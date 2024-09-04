@@ -1,0 +1,9 @@
+/.vs
+/EnviBad.API.Common/obj
+/EnviBad.API.Common/bin
+/EnviBad.API.Core/obj
+/EnviBad.API.Core/bin
+/EnviBad.API.Infrastructure/obj
+/EnviBad.API.Infrastructure/bin
+/EnviBad.API.Web/obj
+/EnviBad.API.Web/bin
