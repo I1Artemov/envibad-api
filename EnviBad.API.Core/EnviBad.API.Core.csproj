@@ -10,4 +10,8 @@
     <ProjectReference Include="..\EnviBad.API.Common\EnviBad.API.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

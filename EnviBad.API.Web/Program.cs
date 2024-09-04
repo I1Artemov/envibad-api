@@ -1,3 +1,5 @@
+using EnviBad.API.Common;
+using Microsoft.OpenApi.Models;
 
 namespace EnviBad.API.Web
 {
@@ -8,11 +10,23 @@ namespace EnviBad.API.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options => {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = Const.AppVersion,
+                    Title = "EnviBad Reports API",
+                    Description = "An ASP.NET Core Web API запроса отчетов EnviBad",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Автор сервиса",
+                        Url = new Uri("https://t.me/CrypticPassage")
+                    }
+                });
+                string filePath = Path.Combine(System.AppContext.BaseDirectory, "EnviBad.API.Web.xml");
+                options.IncludeXmlComments(filePath);
+            });
 
             var app = builder.Build();
 
@@ -24,10 +38,7 @@ namespace EnviBad.API.Web
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
