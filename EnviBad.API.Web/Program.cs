@@ -17,10 +17,10 @@ namespace EnviBad.API.Web
                 {
                     Version = Const.AppVersion,
                     Title = "EnviBad Reports API",
-                    Description = "An ASP.NET Core Web API запроса отчетов EnviBad",
+                    Description = "An ASP.NET Core Web API Р·Р°РїСЂРѕСЃР° РѕС‚С‡РµС‚РѕРІ EnviBad",
                     Contact = new OpenApiContact
                     {
-                        Name = "Автор сервиса",
+                        Name = "РђРІС‚РѕСЂ СЃРµСЂРІРёСЃР°",
                         Url = new Uri("https://t.me/CrypticPassage")
                     }
                 });
@@ -31,13 +31,10 @@ namespace EnviBad.API.Web
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 

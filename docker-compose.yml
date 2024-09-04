@@ -1,0 +1,34 @@
+version: '3.4'
+services:
+  envibad-api-db:
+    image: postgres:12.14-alpine
+    restart: no
+    environment:
+      - TZ=UTC
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+    ports:
+      - '54317:5432'
+    networks:
+      - envibad-api-net
+    volumes:
+      - D:\docker_volumes\envibad_api_postgres:/var/lib/postgresql/data
+  envibad-api:
+    build:
+      context: .
+      dockerfile: api.web.Dockerfile
+    ports:
+      - 8080:8080
+      - 80:80
+    restart: no
+    environment:
+      - TZ=UTC
+    networks:
+      - envibad-api-net
+    depends_on:
+      - envibad-api-db
+    
+networks:
+  envibad-api-net:
+    name: envibad_api_network
+    driver: bridge

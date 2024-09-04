@@ -15,34 +15,34 @@ namespace EnviBad.API.Web.Controllers
 
         private List<UserReportRequest> _mockReports = new List<UserReportRequest> {
             new UserReportRequest{
-                Id=1, ReportName="Тестовый отчет 1", UserInfoId=1, AreaRadius=125,
+                Id=1, ReportName="РўРµСЃС‚РѕРІС‹Р№ РѕС‚С‡РµС‚ 1", UserInfoId=1, AreaRadius=125,
                 CenterLat=66.4316, CenterLong=59.12894, LastStatus=ReportStatus.InProgress.ToString()
             },
             new UserReportRequest{
-                Id=2, ReportName="Второй тестовый отчет", UserInfoId=2, AreaRadius=430.6,
+                Id=2, ReportName="Р’С‚РѕСЂРѕР№ С‚РµСЃС‚РѕРІС‹Р№ РѕС‚С‡РµС‚", UserInfoId=2, AreaRadius=430.6,
                 CenterLat=66.1230, CenterLong=60.0765, LastStatus=ReportStatus.Failed.ToString()
             }
         };
 
-        /// <summary> Список всех запросов на создание отчетов по области </summary>
-        /// <returns>Список запросов на отчеты</returns>
+        /// <summary> РЎРїРёСЃРѕРє РІСЃРµС… Р·Р°РїСЂРѕСЃРѕРІ РЅР° СЃРѕР·РґР°РЅРёРµ РѕС‚С‡РµС‚РѕРІ РїРѕ РѕР±Р»Р°СЃС‚Рё </summary>
+        /// <returns>РЎРїРёСЃРѕРє Р·Р°РїСЂРѕСЃРѕРІ РЅР° РѕС‚С‡РµС‚С‹</returns>
         [HttpGet, Route("requested")]
         public IEnumerable<UserReportRequest> GetReportRequestsList()
         {
             return _mockReports;
         }
 
-        /// <summary> Возврат запроса на отчет по его ID в БД </summary>
-        /// <returns>Один запрос на создание отчета</returns>
+        /// <summary> Р’РѕР·РІСЂР°С‚ Р·Р°РїСЂРѕСЃР° РЅР° РѕС‚С‡РµС‚ РїРѕ РµРіРѕ ID РІ Р‘Р” </summary>
+        /// <returns>РћРґРёРЅ Р·Р°РїСЂРѕСЃ РЅР° СЃРѕР·РґР°РЅРёРµ РѕС‚С‡РµС‚Р°</returns>
         [HttpGet, Route("requested/{id:int}")]
         public UserReportRequest? GetReportRequestById(int id)
         {
             return _mockReports.FirstOrDefault(x => x.Id == id);
         }
 
-        /// <summary> Создание запроса на построение отчета по области </summary>
-        /// <param name="model">Параметры отчета по области</param>
-        /// <returns>ID запроса на построение отчета в БД</returns>
+        /// <summary> РЎРѕР·РґР°РЅРёРµ Р·Р°РїСЂРѕСЃР° РЅР° РїРѕСЃС‚СЂРѕРµРЅРёРµ РѕС‚С‡РµС‚Р° РїРѕ РѕР±Р»Р°СЃС‚Рё </summary>
+        /// <param name="model">РџР°СЂР°РјРµС‚СЂС‹ РѕС‚С‡РµС‚Р° РїРѕ РѕР±Р»Р°СЃС‚Рё</param>
+        /// <returns>ID Р·Р°РїСЂРѕСЃР° РЅР° РїРѕСЃС‚СЂРѕРµРЅРёРµ РѕС‚С‡РµС‚Р° РІ Р‘Р”</returns>
         [HttpPost, Route("requested")]
         public ActionResult<int> RequestReport([FromBody] ReportRequestCreationDto model)
         {
@@ -50,7 +50,7 @@ namespace EnviBad.API.Web.Controllers
                 (model.AreaRadius < Const.MinReportAreRadius || model.AreaRadius > Const.MaxReportAreRadius))
             {
                 return BadRequest(
-                    $"Радиус области меньше {Const.MinReportAreRadius}, либо больше {Const.MaxReportAreRadius}");
+                    $"Р Р°РґРёСѓСЃ РѕР±Р»Р°СЃС‚Рё РјРµРЅСЊС€Рµ {Const.MinReportAreRadius}, Р»РёР±Рѕ Р±РѕР»СЊС€Рµ {Const.MaxReportAreRadius}");
             }
             return 0;
         }
