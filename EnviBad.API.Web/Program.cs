@@ -1,4 +1,7 @@
 using EnviBad.API.Common;
+using EnviBad.API.Core.Options;
+using EnviBad.API.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 namespace EnviBad.API.Web
@@ -28,7 +31,16 @@ namespace EnviBad.API.Web
                 options.IncludeXmlComments(filePath);
             });
 
-            var app = builder.Build();
+            IConfiguration configuration = new ConfigurationBuilder()
+                            .AddJsonFile("appsettings.json")
+                            .Build();
+            builder.Services.AddDbContext<EnviBadApiContext>(options =>
+            {
+                options.UseNpgsql(configuration["ConnectionStrings:EnviBadPostgres"]);
+            });
+            builder.Services.Configure<MassTransitOptions>(configuration.GetSection("MassTransitOptions"));
+
+            WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
             app.UseSwagger();

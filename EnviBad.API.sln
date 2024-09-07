@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnviBad.API.Web", "EnviBad.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnviBad.API.Core", "EnviBad.API.Core\EnviBad.API.Core.csproj", "{F38230CE-AA75-411E-9925-AE74C900646D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnviBad.API.Common", "EnviBad.API.Common\EnviBad.API.Common.csproj", "{2F29C7CF-DEC0-4639-B264-5944D56647A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnviBad.API.Common", "EnviBad.API.Common\EnviBad.API.Common.csproj", "{2F29C7CF-DEC0-4639-B264-5944D56647A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnviBad.API.Infrastructure", "EnviBad.API.Infrastructure\EnviBad.API.Infrastructure.csproj", "{920A1387-B425-4FF9-BDD6-18CEF6369D3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnviBad.API.Infrastructure", "EnviBad.API.Infrastructure\EnviBad.API.Infrastructure.csproj", "{920A1387-B425-4FF9-BDD6-18CEF6369D3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

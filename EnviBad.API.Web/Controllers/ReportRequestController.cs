@@ -1,6 +1,7 @@
 using EnviBad.API.Common;
 using EnviBad.API.Common.DTO;
 using EnviBad.API.Common.Models;
+using EnviBad.API.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnviBad.API.Web.Controllers
@@ -9,8 +10,11 @@ namespace EnviBad.API.Web.Controllers
     [Route("report")]
     public class ReportRequestController : ControllerBase
     {
-        public ReportRequestController()
+        private readonly EnviBadApiContext _db;
+
+        public ReportRequestController(EnviBadApiContext db)
         {
+            _db = db;
         }
 
         private List<UserReportRequest> _mockReports = new List<UserReportRequest> {

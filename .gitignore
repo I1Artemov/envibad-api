@@ -7,3 +7,5 @@
 /EnviBad.API.Infrastructure/bin
 /EnviBad.API.Web/obj
 /EnviBad.API.Web/bin
+/appsettings.json
+/EnviBad.API.Web/appsettings.json
