@@ -1,6 +1,7 @@
 using EnviBad.API.Common;
-using EnviBad.API.Core.Options;
+using EnviBad.API.Common.Models.Options;
 using EnviBad.API.Infrastructure.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -38,7 +39,24 @@ namespace EnviBad.API.Web
             {
                 options.UseNpgsql(configuration["ConnectionStrings:EnviBadPostgres"]);
             });
-            builder.Services.Configure<MassTransitOptions>(configuration.GetSection("MassTransitOptions"));
+
+            builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    MassTransitOptions? rabbitSettings = builder.Configuration
+                        .GetSection("MassTransitOptions")
+                        .Get<MassTransitOptions>();
+
+                    cfg.Host(rabbitSettings?.RabbitHost, rabbitSettings?.RabbitPort ?? 5672, "/envibad", h =>
+                    {
+                        h.Username(rabbitSettings?.RabbitUser ?? "guest");
+                        h.Password(rabbitSettings?.RabbitPassword ?? "guest");
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
 
             WebApplication app = builder.Build();
 

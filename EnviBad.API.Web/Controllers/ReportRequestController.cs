@@ -1,7 +1,9 @@
 using EnviBad.API.Common;
 using EnviBad.API.Common.DTO;
 using EnviBad.API.Common.Models;
+using EnviBad.API.Common.Models.MqMessages;
 using EnviBad.API.Infrastructure.Contexts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnviBad.API.Web.Controllers
@@ -11,10 +13,12 @@ namespace EnviBad.API.Web.Controllers
     public class ReportRequestController : ControllerBase
     {
         private readonly EnviBadApiContext _db;
+        private readonly IPublishEndpoint _mqPublishEndpoint;
 
-        public ReportRequestController(EnviBadApiContext db)
+        public ReportRequestController(EnviBadApiContext db, IPublishEndpoint mqPublishEndpoint)
         {
             _db = db;
+            _mqPublishEndpoint = mqPublishEndpoint;
         }
 
         private List<UserReportRequest> _mockReports = new List<UserReportRequest> {
@@ -48,7 +52,7 @@ namespace EnviBad.API.Web.Controllers
         /// <param name="model">Параметры отчета по области</param>
         /// <returns>ID запроса на построение отчета в БД</returns>
         [HttpPost, Route("requested")]
-        public ActionResult<int> RequestReport([FromBody] ReportRequestCreationDto model)
+        public async Task<ActionResult<int>> RequestReport([FromBody] ReportRequestCreationDto model)
         {
             if (model.AreaRadius != null && 
                 (model.AreaRadius < Const.MinReportAreRadius || model.AreaRadius > Const.MaxReportAreRadius))
@@ -56,7 +60,37 @@ namespace EnviBad.API.Web.Controllers
                 return BadRequest(
                     $"Радиус области меньше {Const.MinReportAreRadius}, либо больше {Const.MaxReportAreRadius}");
             }
-            return 0;
+
+            // TODO: Создать запись в БД
+
+            // Сообщение в очереди на то, что нужно обрабатывать новый отчет
+            string? mqPublishResult = await publishReportRequestCreated(model, 1, 1);
+            if (mqPublishResult != null)
+                return StatusCode(500, mqPublishResult);
+            return 1;
+        }
+
+        private async Task<string?> publishReportRequestCreated(
+            ReportRequestCreationDto reportParams, int userId, int reportEntryId)
+        {
+            using var cancelSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try
+            {
+                await _mqPublishEndpoint.Publish<ReportRequestCreated>(new
+                {
+                    Id = reportEntryId, // TODO: ID Создаваемой записи
+                    UserInfoId = userId, // TODO: Actual User ID from request
+                    CenterLat = reportParams.CenterLat,
+                    CenterLong = reportParams.CenterLong,
+                    AreaRadius = reportParams.AreaRadius
+                }, cancelSource.Token);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // TODO: Logging
+                return "Error publishing MQ message: " + ex.Message;
+            }
         }
     }
 }
