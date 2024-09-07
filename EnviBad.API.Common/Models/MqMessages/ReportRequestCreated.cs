@@ -1,4 +1,4 @@
-﻿namespace EnviBad.API.Common.Models.MqMessages
+﻿namespace EnviBad.Shared.Models.MqMessages
 {
     public interface ReportRequestCreated
     {

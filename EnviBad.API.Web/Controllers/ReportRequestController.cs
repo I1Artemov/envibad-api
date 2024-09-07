@@ -1,7 +1,7 @@
 using EnviBad.API.Common;
 using EnviBad.API.Common.DTO;
 using EnviBad.API.Common.Models;
-using EnviBad.API.Common.Models.MqMessages;
+using EnviBad.Shared.Models.MqMessages;
 using EnviBad.API.Infrastructure.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
