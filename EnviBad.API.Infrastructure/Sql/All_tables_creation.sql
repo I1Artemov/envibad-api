@@ -23,17 +23,17 @@ CREATE TABLE "LogEntries" (
 );
 COMMENT ON TABLE "LogEntries" is 'Логи приложения';
 
-CREATE TABLE "UpdateInfo" (
+CREATE TABLE "UpdateInfos" (
 	"Id" serial,
 	"UpdateTime" timestamp,
 	"UpdateVersion" text,
 	"AppVersion" text,
 	"Description" text,
-	CONSTRAINT "PK_UpdateInfo" PRIMARY KEY ("Id") 
+	CONSTRAINT "PK_UpdateInfos" PRIMARY KEY ("Id") 
 );
-COMMENT ON TABLE "UpdateInfo" is 'Таблица лога измений SQL';
+COMMENT ON TABLE "UpdateInfos" is 'Таблица лога измений SQL';
 
-CREATE TABLE "UserInfo" (
+CREATE TABLE "UserInfos" (
 	"Id" serial,
 	"CreationDateTime" timestamptz(6),
 	"Login" text,
@@ -41,11 +41,11 @@ CREATE TABLE "UserInfo" (
 	"RefreshToken" text,
 	"IsEnabled" boolean,
 	"IsAdmin" boolean,
-	CONSTRAINT "PK_UserInfo" PRIMARY KEY ("Id") 
+	CONSTRAINT "PK_UserInfos" PRIMARY KEY ("Id") 
 );
-COMMENT ON TABLE "UserInfo" is 'Пользователи сервиса';
+COMMENT ON TABLE "UserInfos" is 'Пользователи сервиса';
 
-CREATE TABLE "UserReportRequest" (
+CREATE TABLE "UserReportRequests" (
 	"Id" serial,
 	"CreationDateTime" timestamptz(6),
 	"UserInfoId" int,
@@ -55,12 +55,12 @@ CREATE TABLE "UserReportRequest" (
 	"AreaRadius" numeric(19,4),
 	"LastStatus" varchar(64),
 	"LastStatusDateTime" timestamptz(6),
-	CONSTRAINT "PK_UserReportRequest" PRIMARY KEY ("Id"),
-	CONSTRAINT "FK_UserReportRequest_UserInfo" FOREIGN KEY ("UserInfoId") REFERENCES "UserInfo" ("Id") ON DELETE CASCADE
+	CONSTRAINT "PK_UserReportRequests" PRIMARY KEY ("Id"),
+	CONSTRAINT "FK_UserReportRequests_UserInfos" FOREIGN KEY ("UserInfoId") REFERENCES "UserInfos" ("Id") ON DELETE CASCADE
 );
-COMMENT ON TABLE "UserReportRequest" is 'Запросы пользователей на создание отчетов';
+COMMENT ON TABLE "UserReportRequests" is 'Запросы пользователей на создание отчетов';
 
-CREATE INDEX "IX_UserReportRequest_UserInfoId" ON "UserReportRequest" ("UserInfoId" ASC);
+CREATE INDEX "IX_UserReportRequests_UserInfoId" ON "UserReportRequests" ("UserInfoId" ASC);
 
-INSERT INTO "UpdateInfo"("UpdateTime", "UpdateVersion", "AppVersion","Description") 
+INSERT INTO "UpdateInfos"("UpdateTime", "UpdateVersion", "AppVersion","Description") 
 VALUES ('now', '0.0.0.1', '1.0.0.0', 'Added basic tables'); 

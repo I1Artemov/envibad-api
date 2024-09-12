@@ -1,9 +1,16 @@
 using EnviBad.API.Common;
+using EnviBad.API.Common.Log;
 using EnviBad.API.Common.Models.Options;
 using EnviBad.API.Infrastructure.Contexts;
+using EnviBad.API.Infrastructure.Interfaces;
+using EnviBad.API.Infrastructure.Log;
+using EnviBad.API.Infrastructure.MessageQueue;
+using EnviBad.API.Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using NLog;
+using Npgsql;
 
 namespace EnviBad.API.Web
 {
@@ -35,9 +42,12 @@ namespace EnviBad.API.Web
             IConfiguration configuration = new ConfigurationBuilder()
                             .AddJsonFile("appsettings.json")
                             .Build();
+            string connectionStr = builder.Configuration.GetConnectionString("EnviBadPostgres");
+            var dsBuilder = new NpgsqlDataSourceBuilder(connectionStr);
+            var dbDataSource = dsBuilder.Build();
             builder.Services.AddDbContext<EnviBadApiContext>(options =>
             {
-                options.UseNpgsql(configuration["ConnectionStrings:EnviBadPostgres"]);
+                options.UseNpgsql(dbDataSource);
             });
 
             builder.Services.AddMassTransit(x =>
@@ -57,6 +67,13 @@ namespace EnviBad.API.Web
                     cfg.ConfigureEndpoints(context);
                 });
             });
+
+            builder.Services.AddScoped<IUserReportRequestRepo, UserReportRequestRepo>();
+            builder.Services.AddScoped<IMassTransitPublisher, MassTransitPublisher>();
+
+            var logger = LogManager.GetLogger("AppLogger");
+            builder.Services.AddSingleton<NLog.ILogger>(logger);
+            builder.Services.AddScoped<IAppLogger, AppLoggerImpl>();
 
             WebApplication app = builder.Build();
 

@@ -14,9 +14,6 @@ namespace EnviBad.API.Infrastructure.Contexts
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            // TODO: Get actual pg connection value
-            string connectionString = "";
-            optionsBuilder.UseNpgsql(connectionString);
         }
     }
 }

@@ -1,10 +1,9 @@
 using EnviBad.API.Common;
 using EnviBad.API.Common.DTO;
 using EnviBad.API.Common.Models;
-using EnviBad.Shared.Models.MqMessages;
-using EnviBad.API.Infrastructure.Contexts;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using EnviBad.API.Common.Log;
+using EnviBad.API.Infrastructure.Interfaces;
 
 namespace EnviBad.API.Web.Controllers
 {
@@ -12,40 +11,36 @@ namespace EnviBad.API.Web.Controllers
     [Route("report")]
     public class ReportRequestController : ControllerBase
     {
-        private readonly EnviBadApiContext _db;
-        private readonly IPublishEndpoint _mqPublishEndpoint;
+        private readonly IUserReportRequestRepo _userReportRequestRepo;
+        private readonly IAppLogger _appLogger;
+        private readonly IMassTransitPublisher _massTransitPublisher;
 
-        public ReportRequestController(EnviBadApiContext db, IPublishEndpoint mqPublishEndpoint)
+        public ReportRequestController(IMassTransitPublisher massTransitPublisher,
+            IAppLogger appLogger, IUserReportRequestRepo userReportRequestRepo)
         {
-            _db = db;
-            _mqPublishEndpoint = mqPublishEndpoint;
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            _userReportRequestRepo = userReportRequestRepo;
+            _appLogger = appLogger;
+            _massTransitPublisher = massTransitPublisher;
         }
-
-        private List<UserReportRequest> _mockReports = new List<UserReportRequest> {
-            new UserReportRequest{
-                Id=1, ReportName="Тестовый отчет 1", UserInfoId=1, AreaRadius=125,
-                CenterLat=66.4316, CenterLong=59.12894, LastStatus=ReportStatus.InProgress.ToString()
-            },
-            new UserReportRequest{
-                Id=2, ReportName="Второй тестовый отчет", UserInfoId=2, AreaRadius=430.6,
-                CenterLat=66.1230, CenterLong=60.0765, LastStatus=ReportStatus.Failed.ToString()
-            }
-        };
 
         /// <summary> Список всех запросов на создание отчетов по области </summary>
         /// <returns>Список запросов на отчеты</returns>
         [HttpGet, Route("requested")]
         public IEnumerable<UserReportRequest> GetReportRequestsList()
         {
-            return _mockReports;
+            return _userReportRequestRepo.GetAllWithoutTracking();
         }
 
         /// <summary> Возврат запроса на отчет по его ID в БД </summary>
         /// <returns>Один запрос на создание отчета</returns>
         [HttpGet, Route("requested/{id:int}")]
-        public UserReportRequest? GetReportRequestById(int id)
+        public ActionResult<UserReportRequest?> GetReportRequestById(int? id)
         {
-            return _mockReports.FirstOrDefault(x => x.Id == id);
+            if (id is null)
+                return BadRequest("Не указан Id");
+
+            return _userReportRequestRepo.GetWithoutTracking(x => x.Id == id);
         }
 
         /// <summary> Создание запроса на построение отчета по области </summary>
@@ -54,43 +49,29 @@ namespace EnviBad.API.Web.Controllers
         [HttpPost, Route("requested")]
         public async Task<ActionResult<int>> RequestReport([FromBody] ReportRequestCreationDto model)
         {
-            if (model.AreaRadius != null && 
+            // TODO: FluentValidation
+            if (model.AreaRadius != null &&
                 (model.AreaRadius < Const.MinReportAreRadius || model.AreaRadius > Const.MaxReportAreRadius))
             {
                 return BadRequest(
                     $"Радиус области меньше {Const.MinReportAreRadius}, либо больше {Const.MaxReportAreRadius}");
             }
 
-            // TODO: Создать запись в БД
+            // TODO: Реальный ID пользователя
+            int userId = 1;
+            // Создание записи о новом запросе отчета в БД
+            UserReportRequest createdRequest = new UserReportRequest { UserInfoId = userId };
+            createdRequest.FillFromCreationDto(model);
+            _userReportRequestRepo.Add(createdRequest);
+            string? dbError = await _userReportRequestRepo.SaveAsync(_appLogger, $"Adding report request for user {userId}");
+            if (dbError != null) 
+                return StatusCode(500, "Не удалось сохранить запрос на отчет в БД");
 
             // Сообщение в очереди на то, что нужно обрабатывать новый отчет
-            string? mqPublishResult = await publishReportRequestCreated(model, 1, 1);
+            string? mqPublishResult = await _massTransitPublisher.PublishReportRequestCreated(model, userId, createdRequest.Id);
             if (mqPublishResult != null)
                 return StatusCode(500, mqPublishResult);
-            return 1;
-        }
-
-        private async Task<string?> publishReportRequestCreated(
-            ReportRequestCreationDto reportParams, int userId, int reportEntryId)
-        {
-            using var cancelSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            try
-            {
-                await _mqPublishEndpoint.Publish<ReportRequestCreated>(new
-                {
-                    Id = reportEntryId, // TODO: ID Создаваемой записи
-                    UserInfoId = userId, // TODO: Actual User ID from request
-                    CenterLat = reportParams.CenterLat,
-                    CenterLong = reportParams.CenterLong,
-                    AreaRadius = reportParams.AreaRadius
-                }, cancelSource.Token);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                // TODO: Logging
-                return "Error publishing MQ message: " + ex.Message;
-            }
+            return createdRequest.Id;
         }
     }
 }

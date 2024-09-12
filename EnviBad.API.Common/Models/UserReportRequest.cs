@@ -1,4 +1,6 @@
-﻿namespace EnviBad.API.Common.Models
+﻿using EnviBad.API.Common.DTO;
+
+namespace EnviBad.API.Common.Models
 {
     /// <summary>
     /// Сущность для запросов пользователей на построение отчетов по области
@@ -16,6 +18,17 @@
         public UserReportRequest()
         {
             LastStatus = ReportStatus.Created.ToString();
+        }
+
+        /// <summary>
+        /// Заполнение новой записи о запросе на отчет по модели, переданной в API Add
+        /// </summary>
+        public void FillFromCreationDto(ReportRequestCreationDto dto)
+        {
+            CenterLat = dto.CenterLat;
+            CenterLong = dto.CenterLong;
+            AreaRadius = dto.AreaRadius;
+            ReportName = dto.ReportName;
         }
     }
 }
