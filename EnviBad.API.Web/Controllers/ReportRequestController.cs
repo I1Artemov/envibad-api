@@ -73,5 +73,34 @@ namespace EnviBad.API.Web.Controllers
                 return StatusCode(500, mqPublishResult);
             return createdRequest.Id;
         }
+
+        /// <summary> Обновление статуса или результата отчета.
+        /// Вызывается воркером обработки отчетов, когда удалось завершить или зафейлить обработку. </summary>
+        /// <param name="model">Параметры отчета по области</param>
+        [HttpPatch, Route("requested")]
+        public async Task<ActionResult> UpdateReport([FromBody] ReportRequestUpdateDto model)
+        {
+            if (model?.ReportRequestId is null)
+                return BadRequest("Не указан Id");
+
+            UserReportRequest? foundReportRequest = _userReportRequestRepo.Get(model.ReportRequestId.Value);
+            if (foundReportRequest == null)
+                return StatusCode(500, $"Не удалось найти запрос на отчет ID={model.ReportRequestId}");
+            if (!string.IsNullOrEmpty(model.Status))
+            {
+                bool isStatusCorrect = Enum.IsDefined(typeof(ReportStatus), model.Status);
+                if (!isStatusCorrect)
+                    return BadRequest("Неверно задан статус");
+            }
+
+            foundReportRequest.SetFieldsFromPatchModel(model);
+            _userReportRequestRepo.Update(foundReportRequest);
+            string? dbError = await _userReportRequestRepo.SaveAsync(_appLogger, 
+                $"Updating report request ID={model.ReportRequestId}");
+            if (dbError != null)
+                return StatusCode(500, "Не удалось сохранить запрос на отчет в БД");
+
+            return Ok();
+        }
     }
 }

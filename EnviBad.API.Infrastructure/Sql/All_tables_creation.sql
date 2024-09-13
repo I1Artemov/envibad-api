@@ -64,3 +64,12 @@ CREATE INDEX "IX_UserReportRequests_UserInfoId" ON "UserReportRequests" ("UserIn
 
 INSERT INTO "UpdateInfos"("UpdateTime", "UpdateVersion", "AppVersion","Description") 
 VALUES ('now', '0.0.0.1', '1.0.0.0', 'Added basic tables'); 
+
+
+ALTER TABLE "UserReportRequests" ADD COLUMN "ResultId" VARCHAR(64);
+ALTER TABLE "UserReportRequests" ADD COLUMN "ExecutionTime" numeric(19,4);
+ALTER TABLE "UserReportRequests" ADD COLUMN "ErrorDescription" TEXT;
+
+
+INSERT INTO "UpdateInfos"("UpdateTime", "UpdateVersion", "AppVersion","Description") 
+VALUES ('now', '0.0.0.2', '1.0.0.0', 'Added ResultId, ExecutionTime, ErrorDescription to UserReportRequests'); 

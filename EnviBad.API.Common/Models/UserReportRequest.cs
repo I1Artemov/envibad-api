@@ -14,10 +14,14 @@ namespace EnviBad.API.Common.Models
         public double? AreaRadius { get; set; }
         public string? LastStatus { get; set; }
         public DateTimeOffset? LastStatusDateTime { get; set; }
+        public string? ResultId { get; set; }
+        public string? ErrorDescription { get; set; }
+        public double? ExecutionTime { get; set; }
 
         public UserReportRequest()
         {
             LastStatus = ReportStatus.Created.ToString();
+            LastStatusDateTime = DateTimeOffset.Now;
         }
 
         /// <summary>
@@ -29,6 +33,21 @@ namespace EnviBad.API.Common.Models
             CenterLong = dto.CenterLong;
             AreaRadius = dto.AreaRadius;
             ReportName = dto.ReportName;
+        }
+
+        /// <summary>
+        /// Обновление полей запроса на отчет по прилетевшей PATCH-модели
+        /// </summary>
+        public void SetFieldsFromPatchModel(ReportRequestUpdateDto dto)
+        {
+            if (!string.IsNullOrEmpty(dto.Status))
+                LastStatus = dto.Status;
+            if (dto.ResultId is not null)
+                ResultId = dto.ResultId;
+            if (dto.ErrorDescription is not null)
+                ErrorDescription = dto.ErrorDescription;
+            if (LastStatusDateTime is not null)
+                ExecutionTime = (DateTimeOffset.Now - LastStatusDateTime).Value.TotalSeconds;
         }
     }
 }
