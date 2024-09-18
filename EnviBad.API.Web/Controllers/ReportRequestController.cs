@@ -49,14 +49,6 @@ namespace EnviBad.API.Web.Controllers
         [HttpPost, Route("requested")]
         public async Task<ActionResult<int>> RequestReport([FromBody] ReportRequestCreationDto model)
         {
-            // TODO: FluentValidation
-            if (model.AreaRadius != null &&
-                (model.AreaRadius < Const.MinReportAreRadius || model.AreaRadius > Const.MaxReportAreRadius))
-            {
-                return BadRequest(
-                    $"Радиус области меньше {Const.MinReportAreRadius}, либо больше {Const.MaxReportAreRadius}");
-            }
-
             // TODO: Реальный ID пользователя
             int userId = 1;
             // Создание записи о новом запросе отчета в БД
